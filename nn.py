@@ -11,6 +11,12 @@ class NN:
     Z = [np.array([])]
 
     def __init__(self, n, sizes, sigmas, dsigmas):
+        '''
+        :param n: number of layers
+        :param sizes: number of neurons for each layer
+        :param sigmas: activations functions for each layer
+        :param dsigmas: derivative of the activations functions for each layer
+        '''
         assert n == len(sizes) == len(sigmas) == len(dsigmas)
         self.n = n
         self.weights = []
@@ -43,6 +49,12 @@ class NN:
         return self.A[self.n - 1]
 
     def train(self, x, y_star, eta):
+        '''
+        Train the network on an input and output
+        :param x: Input
+        :param y_star: Wanted output
+        :param eta: Learning rate
+        '''
         y = self.evaluate(x)
 
         diffs = []
@@ -66,7 +78,10 @@ class NN:
             self.B[i] -= d * eta
 
     def error(self, X, Y):
+        """
+        Get the mean error of the network on an array of inputs/outputs
+        :param X: Array of inputs
+        :param Y: Array of outputs
+        :return: error
+        """
         return np.mean([(Y[i] - self.evaluate(X[i])) ** 2 for i in range(len(X))])
-
-    def result_error(self, X, Y):
-        return np.mean([(Y[i] - np.round(self.evaluate(X[i]))) ** 2 for i in range(len(X))])
