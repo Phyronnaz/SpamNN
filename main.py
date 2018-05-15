@@ -20,9 +20,29 @@ X = df_train
 Y = df["spam_or_not"].as_matrix()
 
 # Create test & train arrays
-mask_test = np.random.choice(np.arange(4600), 500)
-mask_train = np.ones(len(X), np.bool)
-mask_train[mask_test] = 0
+def get_train_test_inds(y,train_proportion=0.7):
+    '''Generates indices, making random stratified split into training set and testing sets
+    with proportions train_proportion and (1-train_proportion) of initial sample.
+    y is any iterable indicating classes of each observation in the sample.
+    Initial proportions of classes inside training and 
+    testing sets are preserved (stratified sampling).
+    '''
+
+    y=np.array(y)
+    train_inds = np.zeros(len(y),dtype=bool)
+    test_inds = np.zeros(len(y),dtype=bool)
+    values = np.unique(y)
+    for value in values:
+        value_inds = np.nonzero(y==value)[0]
+        np.random.shuffle(value_inds)
+        n = int(train_proportion*len(value_inds))
+
+        train_inds[value_inds[:n]]=True
+        test_inds[value_inds[n:]]=True
+
+    return train_inds,test_inds
+
+mask_test, mask_train = get_train_test_inds(Y,train_proportion=0.8)
 
 X_test = X[mask_test]
 Y_test = Y[mask_test]
@@ -37,10 +57,10 @@ errors_1N = []
 # eta = 0.1 #
 #############
 
-nn = NN(3, [df_train.shape[1], 50, 1], 3 * [sigma], 3 * [dsigma])
+nn = NN(4, [df_train.shape[1], 50, 50, 1], 4 * [sigma], 4 * [dsigma])
 
 for i in range(5000, 1000000):
-    k = np.random.randint(0, 4000)
+    k = np.random.randint(0, len(X_train))
     nn.train(X_train[k], Y_train[k], 0.1)
 
     if i % 10000 == 0:
@@ -52,10 +72,10 @@ for i in range(5000, 1000000):
 # eta = 0.01 #
 ##############
 
-nn = NN(3, [df_train.shape[1], 50, 1], 3 * [sigma], 3 * [dsigma])
+nn = NN(4, [df_train.shape[1], 50, 50, 1], 4 * [sigma], 4 * [dsigma])
 
 for i in range(5000, 1000000):
-    k = np.random.randint(0, 4000)
+    k = np.random.randint(0, len(X_train))
     nn.train(X_train[k], Y_train[k], 0.01)
 
     if i % 10000 == 0:
@@ -67,10 +87,10 @@ for i in range(5000, 1000000):
 # eta = 1 / N #
 ###############
 
-nn = NN(3, [df_train.shape[1], 50, 1], 3 * [sigma], 3 * [dsigma])
+nn = NN(4, [df_train.shape[1], 50, 50, 1], 4 * [sigma], 4 * [dsigma])
 
 for i in range(5000, 1000000):
-    k = np.random.randint(0, 4000)
+    k = np.random.randint(0, len(X_train))
     nn.train(X_train[k], Y_train[k], 5000. / i)
 
     if i % 10000 == 0:
